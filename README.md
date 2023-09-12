@@ -9,7 +9,7 @@
 - Para compilar:
 
 ```bash
-línea de compilación
+gcc -c pokemon.c -o pokemon.o
 ```
 
 - Para ejecutar:

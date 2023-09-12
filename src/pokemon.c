@@ -34,9 +34,10 @@ if(leidos != 2){
 return pokemon;
 */
 
-const int MAX_LINEA = 50;
-const int MAX_ATAQUES = 3;
-const int MAX_NOMBRE = 20;
+#define MAX_LINEA 50
+#define MAX_ATAQUES 3
+#define MAX_NOMBRE 20
+
 struct pokemon {
 	char nombre[MAX_NOMBRE];
 	enum TIPO tipo;
@@ -55,14 +56,48 @@ char* leer_linea(FILE* archivo, char* linea)
 
 void parsear_pokemon(char* linea, struct pokemon *pokemon)
 {
-	sscanf(linea,";", pokemon->nombre, pokemon->tipo);
+	char str_tipo[MAX_NOMBRE];
+	int leidos = sscanf(linea, "%[^;];%[^\n]", pokemon->nombre, str_tipo);
+	if(leidos == 2){
+		if (strcmp(str_tipo, "normal") == 0) {
+            pokemon->tipo = NORMAL;
+        }else if(strcmp(str_tipo, "fuego") == 0){
+            pokemon->tipo = FUEGO;
+        }else if(strcmp(str_tipo, "agua") == 0){
+            pokemon->tipo = AGUA;
+        }else if(strcmp(str_tipo, "planta") == 0){
+            pokemon->tipo = PLANTA;
+        }else if(strcmp(str_tipo, "electrico") == 0){
+            pokemon->tipo = ELECTRICO;
+        }else if(strcmp(str_tipo, "roca") == 0){
+            pokemon->tipo = ROCA;
+        } 
+	}
 }
 
 struct ataque* parsear_ataque(char* linea)
 {
 	struct ataque *ataque = malloc(sizeof(struct ataque));
-	sscanf(linea,"", ataque->nombre, ataque->tipo, ataque->poder);
-	return ataque;
+	char str_tipo[MAX_NOMBRE];
+	int leidos = sscanf(linea,"%[^;];%[^;];%u", ataque->nombre, str_tipo, &ataque->poder);
+	if(leidos  == 3){
+		if(strcmp(str_tipo, "normal") == 0){
+			ataque->tipo = NORMAL;
+		}else if(strcmp(str_tipo, "fuego") == 0){
+			ataque->tipo = FUEGO;
+		}else if(strcmp(str_tipo, "agua") == 0){
+			ataque->tipo = AGUA;
+		}else if(strcmp(str_tipo, "planta") == 0){
+			ataque->tipo = PLANTA;
+		}else if(strcmp(str_tipo, "electrico") == 0){
+			ataque->tipo = ELECTRICO;
+		}else if(strcmp(str_tipo, "roca") == 0){
+			ataque->tipo = ROCA;
+		}
+		return ataque;
+	}else{
+		return NULL;
+	}
 }
 
 pokemon_t* obtener_un_pokemon(FILE* archivo)
