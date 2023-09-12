@@ -4,7 +4,7 @@
 
 # TP1
 
-## Repositorio de (Nombre Apellido) - (Padrón) - (Mail)
+## Repositorio de Tomas Garcia Alimena - 110478 - tgarciaa@fi.uba.ar
 
 - Para compilar:
 
