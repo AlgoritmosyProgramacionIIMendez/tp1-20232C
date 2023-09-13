@@ -105,6 +105,20 @@ pokemon_t* obtener_un_pokemon(FILE* archivo)
 	return pokemon;
 }
 
+void burbujeo(pokemon_t *pokemones, int cantidad){
+	for(int i = 0; i < cantidad - 1; i++){
+		for(int j = 0; j < cantidad - i - 1; j++){
+			if(strcpm(pokemones[j].nombre, pokemones[j + 1].nombre) > 0){
+				pokemon_t aux = pokemones[j];
+				pokemones[j] = pokemones [j + 1];
+				pokemones[j + 1] = aux;
+			}
+		}
+	}
+
+
+}
+
 informacion_pokemon_t *pokemon_cargar_archivo(const char *path)
 {
 	informacion_pokemon_t *lista_pokemones = malloc(sizeof(informacion_pokemon_t));
@@ -144,34 +158,79 @@ informacion_pokemon_t *pokemon_cargar_archivo(const char *path)
 
 pokemon_t *pokemon_buscar(informacion_pokemon_t *ip, const char *nombre)
 {
+	if(ip == NULL || nombre == NULL){
+		return NULL;
+	}
+	
+	for(int i = 0; i < ip->cantidad; i++){
+		if(strcmp(ip->pokemones[i].nombre, nombre) == 0){
+			return &ip->pokemones[i];
+		}
+	}
+	
 	return NULL;
 }
 
 int pokemon_cantidad(informacion_pokemon_t *ip)
 {
-	return 0;
+	if(ip == NULL){
+		return 0;
+	}
+	
+	return ip->cantidad;
 }
 
 const char *pokemon_nombre(pokemon_t *pokemon)
 {
-	return NULL;
+	if(pokemon == NULL){
+		return NULL;
+	}
+
+	return pokemon->nombre;
 }
 
 enum TIPO pokemon_tipo(pokemon_t *pokemon)
 {
-	return FUEGO;
+	if(pokemon == NULL){
+		return NORMAL;
+	}
+
+	return pokemon->tipo;
 }
 
 const struct ataque *pokemon_buscar_ataque(pokemon_t *pokemon,
 					   const char *nombre)
 {
+	if(pokemon == NULL || nombre == NULL){
+		return NULL;
+	}
+	
+	for(int i = 0; i < MAX_ATAQUES; i++){
+		if(strcmp(pokemon->ataques[i].nombre, nombre) == 0){
+			return &pokemon->ataques[i];
+		}
+	}
+
 	return NULL;
 }
 
 int con_cada_pokemon(informacion_pokemon_t *ip, void (*f)(pokemon_t *, void *),
 		     void *aux)
 {
-	return 0;
+	if(ip == NULL || f == NULL){
+		return NULL;
+	}
+	
+	burbujeo(ip->pokemones, ip->cantidad);
+
+	int contador = 0;
+	for(int i = 0; i < ip->cantidad; i++){
+		if(f(ip->pokemones[i], aux) == NULL){
+			contador ++;
+		}
+	}
+
+	return contador;
 }
 
 int con_cada_ataque(pokemon_t *pokemon,
@@ -182,4 +241,14 @@ int con_cada_ataque(pokemon_t *pokemon,
 
 void pokemon_destruir_todo(informacion_pokemon_t *ip)
 {
+	if(ip == NULL){
+		return;
+	}
+	if(ip->pokemones != NULL){
+		for(int i = 0; i < ip->cantidad; i++){
+			free(&(ip->pokemones[i]));
+		}
+		free(ip->pokemones);
+	}
+	free(ip);
 }
