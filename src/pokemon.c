@@ -225,9 +225,8 @@ int con_cada_pokemon(informacion_pokemon_t *ip, void (*f)(pokemon_t *, void *),
 
 	int contador = 0;
 	for(int i = 0; i < ip->cantidad; i++){
-		if(f(ip->pokemones[i], aux) == NULL){
-			contador ++;
-		}
+		f(&(ip->pokemones[i]), aux);
+		contador ++;
 	}
 
 	return contador;
@@ -236,7 +235,17 @@ int con_cada_pokemon(informacion_pokemon_t *ip, void (*f)(pokemon_t *, void *),
 int con_cada_ataque(pokemon_t *pokemon,
 		    void (*f)(const struct ataque *, void *), void *aux)
 {
-	return 0;
+	if(pokemon == NULL || f == NULL){
+		return 0;
+	}
+	
+	int contador = 0;
+	for(int i = 0; i < MAX_ATAQUES; i++){
+		f(&(pokemon->ataques[i]), aux);
+		contador ++;
+	}
+
+	return contador;
 }
 
 void pokemon_destruir_todo(informacion_pokemon_t *ip)
