@@ -5,35 +5,6 @@
 #include "ataque.h"
 #include <string.h>
 
-
-/*
-FILE* archivo = fopen(nombre, "r");
-if(archivo == NULL){
-	printf("Error al abrir el archivo.\n");
-	return -1;
-}
-
-char linea[500];
-while(fgets(linea, 500, archivo) != NULL){
-	printf("linea leida: %s.\n", linea);
-}
-fclose(archivo);
-
-
-struct pokemon *crear_pokemon(const char *pokemon){
-	struct pokemon *pokemon = malloc(sizeof(struct pokemon));
-	if(pokemon == NULL){
-		return NULL;
-	}
-}
-int leidos = sscanf(string, "%[^;];%i", pokemon->nombre, pokemon->poder);
-if(leidos != 2){
-	free(pokemon);
-	return NULL;
-}
-return pokemon;
-*/
-
 #define MAX_LINEA 50
 #define MAX_ATAQUES 3
 #define MAX_NOMBRE 20
@@ -136,18 +107,39 @@ pokemon_t* obtener_un_pokemon(FILE* archivo)
 
 informacion_pokemon_t *pokemon_cargar_archivo(const char *path)
 {
+	informacion_pokemon_t *lista_pokemones = malloc(sizeof(informacion_pokemon_t));
+	if(lista_pokemones == NULL){
+    	return NULL;
+    }
+	
+	lista_pokemones->pokemones = NULL;
+	lista_pokemones->cantidad = 0;
+	
 	FILE *archivo = fopen(path, "r");
 	if(archivo == NULL){
-		printf("Error al abrir el archivo.\n");
+		free(lista_pokemones);
 		return NULL;
 	}
 	
 	pokemon_t *pokemon_leido;
 	while((pokemon_leido = obtener_un_pokemon(archivo)) != NULL){
-		//agregar pokemon
+		lista_pokemones->cantidad ++;
+		pokemon_t *aux = realloc(lista_pokemones->pokemones, sizeof(pokemon_t) * lista_pokemones->cantidad);
+
+		if(aux == NULL){
+            fclose(archivo);
+            free(lista_pokemones);
+            return NULL;
+    	}
+
+		lista_pokemones->pokemones = aux;
+		lista_pokemones->pokemones[lista_pokemones->cantidad - 1] = *pokemon_leido;
+        free(pokemon_leido);
 	}
-	
-	return NULL;
+
+	fclose(archivo);
+
+	return lista_pokemones;
 }
 
 pokemon_t *pokemon_buscar(informacion_pokemon_t *ip, const char *nombre)
