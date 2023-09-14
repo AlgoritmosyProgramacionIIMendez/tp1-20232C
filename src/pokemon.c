@@ -8,6 +8,7 @@
 #define MAX_LINEA 50
 #define MAX_ATAQUES 3
 #define MAX_NOMBRE 20
+#define ERROR -1
 
 struct pokemon {
 	char nombre[MAX_NOMBRE];
@@ -20,9 +21,9 @@ struct info_pokemon {
 	int cantidad;
 };
 
-char* leer_linea(FILE* archivo, char* linea)
+char* leer_linea(FILE* archivo, char* linea, int tamaño_maximo)
 {
-	return fgets(linea, sizeof(linea), archivo);
+	return fgets(linea, tamaño_maximo, archivo);
 }
 
 void parsear_pokemon(char* linea, struct pokemon *pokemon)
@@ -42,66 +43,62 @@ void parsear_pokemon(char* linea, struct pokemon *pokemon)
             pokemon->tipo = ELECTRICO;
         }else if(strcmp(str_tipo, "roca") == 0){
             pokemon->tipo = ROCA;
-        } 
+        }else{
+			pokemon->tipo = ERROR;
+		}
 	}
 }
 
-struct ataque* parsear_ataque(char* linea)
+void parsear_ataque(char* linea, struct pokemon *pokemon, int i)
 {
-	struct ataque *ataque = malloc(sizeof(struct ataque));
 	char str_tipo[MAX_NOMBRE];
-	int leidos = sscanf(linea,"%[^;];%[^;];%u", ataque->nombre, str_tipo, &ataque->poder);
+	int leidos = sscanf(linea,"%[^;];%[^;];%u", pokemon->ataques[i].nombre, str_tipo, &pokemon->ataques[i].poder);
 	if(leidos  == 3){
 		if(strcmp(str_tipo, "normal") == 0){
-			ataque->tipo = NORMAL;
+			pokemon->ataques[i].tipo = NORMAL;
 		}else if(strcmp(str_tipo, "fuego") == 0){
-			ataque->tipo = FUEGO;
+			pokemon->ataques[i].tipo = FUEGO;
 		}else if(strcmp(str_tipo, "agua") == 0){
-			ataque->tipo = AGUA;
+			pokemon->ataques[i].tipo = AGUA;
 		}else if(strcmp(str_tipo, "planta") == 0){
-			ataque->tipo = PLANTA;
+			pokemon->ataques[i].tipo = PLANTA;
 		}else if(strcmp(str_tipo, "electrico") == 0){
-			ataque->tipo = ELECTRICO;
+			pokemon->ataques[i].tipo = ELECTRICO;
 		}else if(strcmp(str_tipo, "roca") == 0){
-			ataque->tipo = ROCA;
+			pokemon->ataques[i].tipo = ROCA;
 		}
-		return ataque;
 	}else{
-		return NULL;
+		pokemon->ataques[i].tipo = ERROR;
 	}
 }
 
 pokemon_t* obtener_un_pokemon(FILE* archivo)
 {
 	struct pokemon *pokemon = malloc(sizeof(struct pokemon));
-	char linea[MAX_LINEA];
-    if (leer_linea(archivo, linea) == NULL){
-        free(pokemon);
-        return NULL;
-    }
-	leer_linea(archivo, linea);
-	parsear_pokemon(linea, pokemon);
 	if(pokemon == NULL){
 		return NULL;
 	}
-	leer_linea(archivo, linea);
-	struct ataque *ataque1 = parsear_ataque(linea);
-	leer_linea(archivo, linea);
-	struct ataque *ataque2 = parsear_ataque(linea);
-	leer_linea(archivo, linea);
-	struct ataque *ataque3 = parsear_ataque(linea);
-	
-	pokemon->ataques[0] = *ataque1;
-	pokemon->ataques[1] = *ataque2;
-	pokemon->ataques[2] = *ataque3;
-	if(ataque1 == NULL ||ataque2 == NULL ||ataque3 == NULL){
-		free(pokemon);
-		return NULL;
-	}
-	free(ataque1);
-	free(ataque2);
-	free(ataque3);
 
+	char linea[MAX_LINEA];
+    
+	if(leer_linea(archivo, linea, sizeof(linea)) == NULL){
+        free(pokemon);
+        return NULL;
+    }
+	parsear_pokemon(linea, pokemon);
+	
+	for(int i = 0; i < MAX_ATAQUES; i++){
+        if(leer_linea(archivo, linea, sizeof(linea)) == NULL){
+            free(pokemon);
+            return NULL;
+        }
+		parsear_ataque(linea, pokemon, i);
+		
+        if(pokemon->tipo == ERROR || pokemon->ataques[i].tipo == ERROR){
+            free(pokemon);
+            return NULL;
+        }
+    }
 	return pokemon;
 }
 
@@ -115,8 +112,6 @@ void burbujeo(pokemon_t *pokemones, int cantidad){
 			}
 		}
 	}
-
-
 }
 
 informacion_pokemon_t *pokemon_cargar_archivo(const char *path)
@@ -135,23 +130,32 @@ informacion_pokemon_t *pokemon_cargar_archivo(const char *path)
 		return NULL;
 	}
 	
-	pokemon_t *pokemon_leido;
-	while((pokemon_leido = obtener_un_pokemon(archivo)) != NULL){
-		lista_pokemones->cantidad ++;
-		pokemon_t *aux = realloc(lista_pokemones->pokemones, sizeof(pokemon_t) * lista_pokemones->cantidad);
+	pokemon_t *pokemon_leido = NULL;
+	while(!feof(archivo)){
+		pokemon_leido = obtener_un_pokemon(archivo);
+		if(pokemon_leido != NULL){
+			lista_pokemones->cantidad ++;
+			pokemon_t *aux = realloc(lista_pokemones->pokemones, sizeof(pokemon_t) * (size_t)lista_pokemones->cantidad);
 
-		if(aux == NULL){
-            fclose(archivo);
-            free(lista_pokemones);
-            return NULL;
-    	}
-
-		lista_pokemones->pokemones = aux;
-		lista_pokemones->pokemones[lista_pokemones->cantidad - 1] = *pokemon_leido;
-        free(pokemon_leido);
+			if(aux == NULL){
+        		fclose(archivo);
+        		free(pokemon_leido);
+				free(lista_pokemones->pokemones);
+				free(lista_pokemones);
+        		return NULL;
+    		}
+			lista_pokemones->pokemones = aux;
+			lista_pokemones->pokemones[lista_pokemones->cantidad - 1] = *pokemon_leido;
+        	free(pokemon_leido);
+		}	
 	}
-
 	fclose(archivo);
+
+	if(lista_pokemones->cantidad == 0){
+		free(lista_pokemones->pokemones);
+		free(lista_pokemones);
+		return NULL;
+	}
 
 	return lista_pokemones;
 }
@@ -225,8 +229,10 @@ int con_cada_pokemon(informacion_pokemon_t *ip, void (*f)(pokemon_t *, void *),
 
 	int contador = 0;
 	for(int i = 0; i < ip->cantidad; i++){
-		f(&(ip->pokemones[i]), aux);
-		contador ++;
+		if(ip->pokemones[i].nombre[0] != '\0'){
+			f(&(ip->pokemones[i]), aux);
+			contador ++;
+		}
 	}
 
 	return contador;
@@ -241,8 +247,10 @@ int con_cada_ataque(pokemon_t *pokemon,
 	
 	int contador = 0;
 	for(int i = 0; i < MAX_ATAQUES; i++){
-		f(&(pokemon->ataques[i]), aux);
-		contador ++;
+		if(pokemon->ataques[i].nombre[0] != '\0'){
+			f(&(pokemon->ataques[i]), aux);
+			contador ++;
+		}
 	}
 
 	return contador;
