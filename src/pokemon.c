@@ -108,7 +108,7 @@ pokemon_t* obtener_un_pokemon(FILE* archivo)
 void burbujeo(pokemon_t *pokemones, int cantidad){
 	for(int i = 0; i < cantidad - 1; i++){
 		for(int j = 0; j < cantidad - i - 1; j++){
-			if(strcpm(pokemones[j].nombre, pokemones[j + 1].nombre) > 0){
+			if(strcmp(pokemones[j].nombre, pokemones[j + 1].nombre) > 0){
 				pokemon_t aux = pokemones[j];
 				pokemones[j] = pokemones [j + 1];
 				pokemones[j + 1] = aux;
@@ -206,7 +206,7 @@ const struct ataque *pokemon_buscar_ataque(pokemon_t *pokemon,
 	}
 	
 	for(int i = 0; i < MAX_ATAQUES; i++){
-		if(strcmp(pokemon->ataques[i].nombre, nombre) == 0){
+		if(pokemon->ataques[i].nombre != NULL && strcmp(pokemon->ataques[i].nombre, nombre) == 0){
 			return &pokemon->ataques[i];
 		}
 	}
@@ -217,8 +217,8 @@ const struct ataque *pokemon_buscar_ataque(pokemon_t *pokemon,
 int con_cada_pokemon(informacion_pokemon_t *ip, void (*f)(pokemon_t *, void *),
 		     void *aux)
 {
-	if(ip == NULL || f == NULL){
-		return NULL;
+	if(ip == NULL || f == NULL || aux == NULL){
+		return 0;
 	}
 	
 	burbujeo(ip->pokemones, ip->cantidad);
@@ -235,7 +235,7 @@ int con_cada_pokemon(informacion_pokemon_t *ip, void (*f)(pokemon_t *, void *),
 int con_cada_ataque(pokemon_t *pokemon,
 		    void (*f)(const struct ataque *, void *), void *aux)
 {
-	if(pokemon == NULL || f == NULL){
+	if(pokemon == NULL || f == NULL || aux == NULL){
 		return 0;
 	}
 	
@@ -253,11 +253,6 @@ void pokemon_destruir_todo(informacion_pokemon_t *ip)
 	if(ip == NULL){
 		return;
 	}
-	if(ip->pokemones != NULL){
-		for(int i = 0; i < ip->cantidad; i++){
-			free(&(ip->pokemones[i]));
-		}
-		free(ip->pokemones);
-	}
+	free(ip->pokemones);
 	free(ip);
 }
