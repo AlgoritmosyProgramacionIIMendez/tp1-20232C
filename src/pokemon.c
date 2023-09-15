@@ -5,9 +5,9 @@
 #include "ataque.h"
 #include <string.h>
 
-#define MAX_LINEA 50
+#define MAX_LINEA 100
 #define MAX_ATAQUES 3
-#define MAX_NOMBRE 20
+#define MAX_NOMBRE 30
 #define ERROR -1
 
 struct pokemon {
@@ -23,15 +23,23 @@ struct info_pokemon {
 
 char* leer_linea(FILE* archivo, char* linea, int tamaño_maximo)
 {
+	if(archivo == NULL){
+		return NULL;
+	}
+
 	return fgets(linea, tamaño_maximo, archivo);
 }
 
 void parsear_pokemon(char* linea, struct pokemon *pokemon)
 {
+	if(pokemon == NULL || linea == NULL){
+		return;
+	}
+	
 	char str_tipo[MAX_NOMBRE];
 	int leidos = sscanf(linea, "%[^;];%[^\n]", pokemon->nombre, str_tipo);
 	if(leidos == 2){
-		if (strcmp(str_tipo, "normal") == 0) {
+		if(strcmp(str_tipo, "normal") == 0){
             pokemon->tipo = NORMAL;
         }else if(strcmp(str_tipo, "fuego") == 0){
             pokemon->tipo = FUEGO;
@@ -46,11 +54,17 @@ void parsear_pokemon(char* linea, struct pokemon *pokemon)
         }else{
 			pokemon->tipo = ERROR;
 		}
+	}else{
+		pokemon->tipo = ERROR;
 	}
 }
 
 void parsear_ataque(char* linea, struct pokemon *pokemon, int i)
 {
+	if(pokemon == NULL || linea == NULL){
+		return;
+	}
+	
 	char str_tipo[MAX_NOMBRE];
 	int leidos = sscanf(linea,"%[^;];%[^;];%u", pokemon->ataques[i].nombre, str_tipo, &pokemon->ataques[i].poder);
 	if(leidos  == 3){
@@ -66,6 +80,8 @@ void parsear_ataque(char* linea, struct pokemon *pokemon, int i)
 			pokemon->ataques[i].tipo = ELECTRICO;
 		}else if(strcmp(str_tipo, "roca") == 0){
 			pokemon->ataques[i].tipo = ROCA;
+		}else{
+			pokemon->ataques[i].tipo = ERROR;
 		}
 	}else{
 		pokemon->ataques[i].tipo = ERROR;
@@ -74,35 +90,44 @@ void parsear_ataque(char* linea, struct pokemon *pokemon, int i)
 
 pokemon_t* obtener_un_pokemon(FILE* archivo)
 {
+	if(archivo == NULL){
+		return NULL;
+	}
+	
 	struct pokemon *pokemon = malloc(sizeof(struct pokemon));
 	if(pokemon == NULL){
 		return NULL;
 	}
-
-	char linea[MAX_LINEA];
     
-	if(leer_linea(archivo, linea, sizeof(linea)) == NULL){
-        free(pokemon);
-        return NULL;
-    }
+	char linea[MAX_LINEA];
+
+	if(leer_linea(archivo, linea, MAX_LINEA) == NULL){
+		free(pokemon);
+		return NULL;
+	}
 	parsear_pokemon(linea, pokemon);
 	
 	for(int i = 0; i < MAX_ATAQUES; i++){
-        if(leer_linea(archivo, linea, sizeof(linea)) == NULL){
-            free(pokemon);
-            return NULL;
-        }
+		if(leer_linea(archivo, linea, MAX_LINEA) == NULL){
+			free(pokemon);
+			return NULL;
+		}
 		parsear_ataque(linea, pokemon, i);
-		
-        if(pokemon->tipo == ERROR || pokemon->ataques[i].tipo == ERROR){
+    }
+	for(int j = 0; j < MAX_ATAQUES; j++){
+		if(pokemon->tipo == ERROR || pokemon->ataques[j].tipo == ERROR){
             free(pokemon);
             return NULL;
         }
-    }
+	}	
 	return pokemon;
 }
 
 void burbujeo(pokemon_t *pokemones, int cantidad){
+	if(pokemones == NULL){
+		return;
+	}
+	
 	for(int i = 0; i < cantidad - 1; i++){
 		for(int j = 0; j < cantidad - i - 1; j++){
 			if(strcmp(pokemones[j].nombre, pokemones[j + 1].nombre) > 0){
@@ -116,6 +141,9 @@ void burbujeo(pokemon_t *pokemones, int cantidad){
 
 informacion_pokemon_t *pokemon_cargar_archivo(const char *path)
 {
+	if(path == NULL){
+		return NULL;
+	}
 	informacion_pokemon_t *lista_pokemones = malloc(sizeof(informacion_pokemon_t));
 	if(lista_pokemones == NULL){
     	return NULL;
@@ -258,7 +286,7 @@ int con_cada_ataque(pokemon_t *pokemon,
 
 void pokemon_destruir_todo(informacion_pokemon_t *ip)
 {
-	if(ip == NULL){
+	if(ip == NULL || ip->pokemones == NULL){
 		return;
 	}
 	free(ip->pokemones);
