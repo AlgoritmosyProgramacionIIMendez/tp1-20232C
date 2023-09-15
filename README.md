@@ -57,4 +57,4 @@ vector_original = vector;
 ---
 
 ## Respuestas a las preguntas teóricas
-Incluír acá las respuestas a las preguntas del enunciado (si aplica).
+Para ordenar a los pokemones alfabeticamente, utilice el metodo bubble sort(burbujeo), que ordena la lista, comparando elemento a elemento y realizando un cambio de posicion en caso de ser necesario. En el peor de los casos va a tener que cambiar de posicion a todos los elementos, por lo que si tomamos a n como la cantidad de elementos, se van a tener q realizar n movimientos n veces, es decir n.n o n². Costo computacional O(n²). Por lo contrario, en el mejor de los casos, la lista recibida ya esta ordenada por lo que solamente la recorre 1 vez, comparando los elementos n veces, es decir, que tiene un costo computacional en el mejor de los casos de O(n).

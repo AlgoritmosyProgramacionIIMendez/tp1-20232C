@@ -39,17 +39,17 @@ void parsear_pokemon(char* linea, struct pokemon *pokemon)
 	char str_tipo[MAX_NOMBRE];
 	int leidos = sscanf(linea, "%[^;];%[^\n]", pokemon->nombre, str_tipo);
 	if(leidos == 2){
-		if(strcmp(str_tipo, "normal") == 0){
+		if(strcmp(str_tipo, "N") == 0){
             pokemon->tipo = NORMAL;
-        }else if(strcmp(str_tipo, "fuego") == 0){
+        }else if(strcmp(str_tipo, "F") == 0){
             pokemon->tipo = FUEGO;
-        }else if(strcmp(str_tipo, "agua") == 0){
+        }else if(strcmp(str_tipo, "A") == 0){
             pokemon->tipo = AGUA;
-        }else if(strcmp(str_tipo, "planta") == 0){
+        }else if(strcmp(str_tipo, "P") == 0){
             pokemon->tipo = PLANTA;
-        }else if(strcmp(str_tipo, "electrico") == 0){
+        }else if(strcmp(str_tipo, "E") == 0){
             pokemon->tipo = ELECTRICO;
-        }else if(strcmp(str_tipo, "roca") == 0){
+        }else if(strcmp(str_tipo, "R") == 0){
             pokemon->tipo = ROCA;
         }else{
 			pokemon->tipo = ERROR;
@@ -68,17 +68,17 @@ void parsear_ataque(char* linea, struct pokemon *pokemon, int i)
 	char str_tipo[MAX_NOMBRE];
 	int leidos = sscanf(linea,"%[^;];%[^;];%u", pokemon->ataques[i].nombre, str_tipo, &pokemon->ataques[i].poder);
 	if(leidos  == 3){
-		if(strcmp(str_tipo, "normal") == 0){
+		if(strcmp(str_tipo, "N") == 0){
 			pokemon->ataques[i].tipo = NORMAL;
-		}else if(strcmp(str_tipo, "fuego") == 0){
+		}else if(strcmp(str_tipo, "F") == 0){
 			pokemon->ataques[i].tipo = FUEGO;
-		}else if(strcmp(str_tipo, "agua") == 0){
+		}else if(strcmp(str_tipo, "A") == 0){
 			pokemon->ataques[i].tipo = AGUA;
-		}else if(strcmp(str_tipo, "planta") == 0){
+		}else if(strcmp(str_tipo, "P") == 0){
 			pokemon->ataques[i].tipo = PLANTA;
-		}else if(strcmp(str_tipo, "electrico") == 0){
+		}else if(strcmp(str_tipo, "E") == 0){
 			pokemon->ataques[i].tipo = ELECTRICO;
-		}else if(strcmp(str_tipo, "roca") == 0){
+		}else if(strcmp(str_tipo, "R") == 0){
 			pokemon->ataques[i].tipo = ROCA;
 		}else{
 			pokemon->ataques[i].tipo = ERROR;
