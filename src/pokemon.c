@@ -161,6 +161,18 @@ informacion_pokemon_t *pokemon_cargar_archivo(const char *path)
 	pokemon_t *pokemon_leido = NULL;
 	while(!feof(archivo)){
 		pokemon_leido = obtener_un_pokemon(archivo);
+		if(pokemon_leido == NULL){
+			if(lista_pokemones->cantidad == 0){
+				free(pokemon_leido);
+				free(lista_pokemones->pokemones);
+				free(lista_pokemones);
+				fclose(archivo);
+				return NULL;
+			}
+			free(pokemon_leido);
+			fclose(archivo);
+			return lista_pokemones;
+		}
 		if(pokemon_leido != NULL){
 			lista_pokemones->cantidad ++;
 			pokemon_t *aux = realloc(lista_pokemones->pokemones, sizeof(pokemon_t) * (size_t)lista_pokemones->cantidad);
